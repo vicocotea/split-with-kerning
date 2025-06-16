@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Split With Kerning Test</title>
+    <style>
+      @font-face {
+        font-family: "Voyage";
+        src: url("./Voyage-Regular.woff") format("woff");
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      body {
+        margin: 0;
+        padding: 2rem;
+        font-size: 4rem;
+        color: #333;
+        font-family: "Voyage", sans-serif;
+      }
+
+      .test-case {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border: 1px solid #ccc;
+      }
+
+      .test-case h2 {
+        font-size: 1.5rem;
+        margin-top: 0;
+      }
+
+      .letter {
+        display: inline-block;
+        transition: color 0.3s;
+      }
+
+      .letter:hover {
+        color: #ff0000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-case">
+      <h2>Test 1: Simple Text</h2>
+      <p>Hello World</p>
+    </div>
+
+    <div class="test-case">
+      <h2>Test 2: Text with Spaces</h2>
+      <p>Hello World with spaces</p>
+    </div>
+
+    <div class="test-case">
+      <h2>Test 3: Text with Line Breaks &lt;br&gt;</h2>
+      <p>First line<br />Second line<br />Third line</p>
+    </div>
+
+    <div class="test-case">
+      <h2>Test 4: Long Text</h2>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua.
+      </p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
+    <script type="module">
+      import { splitText, applyKerningFromFont } from "../dist/index.js";
+
+      async function runTests() {
+        try {
+          // Load the font
+          const font = await opentype.load("./Voyage-Regular.woff");
+          // Validate font data
+          if (!font) {
+            throw new Error("Invalid font data");
+          }
+
+          // Test each paragraph
+          const paragraphs = document.querySelectorAll("p");
+          paragraphs.forEach(async (p) => {
+            splitText(p);
+            applyKerningFromFont(p, font, {
+              wordSelector: ".word",
+              charSelector: ".char",
+            });
+          });
+
+          console.log("All tests completed successfully");
+        } catch (error) {
+          console.error("Test failed:", error);
+        }
+      }
+
+      runTests();
+    </script>
+  </body>
+</html>
