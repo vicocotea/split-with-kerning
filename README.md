@@ -2,9 +2,6 @@
 
 A simple TypeScript library to split text into letters while respecting kerning.
 
-When you want to animate letters in html / javascript, you have to split the text into small <span>. 
-These spans once animated will lose the kerning
-
 Font kerning explaination from [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/font-kerning)
 
 
@@ -37,8 +34,8 @@ applyKerningFromFont(paragraph, font, {
 
 ## Optimized version 
 
-First, we will export the kerning from a font with export-kerning package
-Then, we can use the exported json (no need to load opentype.js) and applyKerningFromPoint
+First, we will export the kernings from a font with [export-kerning](https://www.npmjs.com/package/export-kerning) package.
+Then, we can use the exported json (no need to load opentype.js) and `applyKerningFromPoint` function
 
 ```typescript
 import { splitText, applyKerningFromExport } from 'split-with-kerning'
