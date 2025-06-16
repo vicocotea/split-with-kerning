@@ -15,7 +15,7 @@ npm install split-with-kerning opentype.js
 
 ```typescript
 import opentype from 'opentype.js';
-import { splitText, applyKerningFromPoint } from 'split-with-kerning'
+import { splitText, applyKerningFromFont } from 'split-with-kerning'
 
 // first load font needed to get the kerning
 const font = await opentype.load("./Voyage-Regular.woff");
@@ -35,7 +35,7 @@ applyKerningFromFont(paragraph, font, {
 ## Optimized version 
 
 First, we will export the kernings from a font with [export-kerning](https://www.npmjs.com/package/export-kerning) package.
-Then, we can use the exported json (no need to load opentype.js) and `applyKerningFromPoint` function
+Then, we can use the exported json (no need to load opentype.js) and `applyKerningFromExport` function
 
 ```typescript
 import { splitText, applyKerningFromExport } from 'split-with-kerning'
