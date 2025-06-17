@@ -1,28 +1,55 @@
 import { getKerningValue } from "./utils/get-kerning-value";
 import { FontLike, KerningData, KerningOptions } from "./types/KerningTypes";
 
+function applyKerningToElement(
+  element: HTMLElement,
+  getKerning: (currentChar: string, nextChar: string) => number,
+  options: KerningOptions = {}
+) {
+  const { wordSelector = ".word", charSelector = ".char" } = options;
+
+  // Batch DOM reads
+  const words = Array.from(element.querySelectorAll<HTMLElement>(wordSelector));
+  const updates: { element: HTMLElement; margin: string }[] = [];
+
+  // Process all words and collect updates
+  for (const word of words) {
+    const letters = Array.from(
+      word.querySelectorAll<HTMLElement>(charSelector)
+    );
+    for (let i = 0; i < letters.length; i++) {
+      const letter = letters[i];
+      if (letter.textContent) {
+        const kerning = getKerning(
+          letter.textContent,
+          letters[i + 1]?.textContent ?? ""
+        );
+        updates.push({
+          element: letter,
+          margin: `${kerning}em`,
+        });
+      }
+    }
+  }
+
+  // Batch DOM writes
+  if (updates.length > 0) {
+    for (const { element, margin } of updates) {
+      element.style.marginInlineEnd = margin;
+    }
+  }
+}
+
 export function applyKerningFromFont(
   element: HTMLElement,
   font: FontLike,
   options: KerningOptions = {}
 ) {
-  const { wordSelector = ".word", charSelector = ".char" } = options;
-  const words = element.querySelectorAll(wordSelector);
-  words.forEach((word) => {
-    const letters: HTMLElement[] = Array.from(
-      word.querySelectorAll(charSelector)
-    );
-    letters.forEach((letter: HTMLElement, index: number) => {
-      if (letter.textContent) {
-        const kerning = getKerningValue(
-          font,
-          letter.textContent,
-          letters[index + 1]?.textContent ?? ""
-        );
-        letter.style.marginRight = `${kerning}em`;
-      }
-    });
-  });
+  applyKerningToElement(
+    element,
+    (currentChar, nextChar) => getKerningValue(font, currentChar, nextChar),
+    options
+  );
 }
 
 export function applyKerningFromExport(
@@ -30,43 +57,41 @@ export function applyKerningFromExport(
   kernings: KerningData,
   options: KerningOptions = {}
 ) {
-  const { wordSelector = ".word", charSelector = ".char" } = options;
-  const words = element.querySelectorAll(wordSelector);
-  words.forEach((word) => {
-    const letters: HTMLElement[] = Array.from(
-      word.querySelectorAll(charSelector)
-    );
-    letters.forEach((letter: HTMLElement, index: number) => {
-      if (letter.textContent && letters[index + 1]) {
-        const pair = `${letter.textContent}${
-          letters[index + 1]?.textContent ?? ""
-        }`;
-        const kerning = kernings.kerningPairs[pair];
-        letter.style.marginRight = `${kerning / kernings.unitsPerEm}em`;
-      }
-    });
-  });
+  applyKerningToElement(
+    element,
+    (currentChar, nextChar) =>
+      (kernings.kerningPairs[`${currentChar}${nextChar}`] ?? 0) /
+      kernings.unitsPerEm,
+    options
+  );
 }
 
-export function splitText(element: HTMLElement) {
+export function splitText(
+  element: HTMLElement,
+  splitType: "word" | "letter" = "letter"
+) {
   function processTextNode(textNode: Node) {
     const frag = document.createDocumentFragment();
-    const words = textNode.textContent?.split(/(\s+)/) ?? []; // split and keep spaces
+    const words = textNode.textContent?.split(/(\s+)/) ?? [];
 
     for (const part of words) {
       if (!part.trim()) {
-        // Just whitespace — preserve as a text node
         frag.appendChild(document.createTextNode(part));
       } else {
-        // Word — wrap in word and char spans
         const wordSpan = document.createElement("span");
+        wordSpan.ariaHidden = "true";
         wordSpan.className = "word";
 
-        for (const char of part) {
-          const charSpan = document.createElement("span");
-          charSpan.className = "char";
-          charSpan.textContent = char;
-          wordSpan.appendChild(charSpan);
+        if (splitType === "word") {
+          wordSpan.textContent = part;
+        } else {
+          for (const char of part) {
+            const charSpan = document.createElement("span");
+            charSpan.ariaHidden = "true";
+            charSpan.className = "char";
+            charSpan.textContent = char;
+            wordSpan.appendChild(charSpan);
+          }
         }
 
         frag.appendChild(wordSpan);
@@ -80,13 +105,13 @@ export function splitText(element: HTMLElement) {
     if (node.nodeType === Node.TEXT_NODE) {
       return processTextNode(node);
     } else if (node.nodeType === Node.ELEMENT_NODE) {
-      const clone = node.cloneNode(false); // shallow clone of the element
+      const clone = node.cloneNode(false);
       for (const child of node.childNodes) {
         clone.appendChild(processNode(child));
       }
       return clone;
     }
-    return document.createDocumentFragment(); // ignore comments, etc.
+    return document.createDocumentFragment();
   }
 
   const newContent = document.createDocumentFragment();
@@ -94,6 +119,7 @@ export function splitText(element: HTMLElement) {
     newContent.appendChild(processNode(child));
   }
 
+  element.ariaLabel = element.textContent ?? "";
   element.innerHTML = "";
   element.appendChild(newContent);
 }

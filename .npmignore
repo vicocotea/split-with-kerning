@@ -1,8 +1,13 @@
 src/
 examples/
+versions/
 .DS_Store
 .git/
 .gitignore
 tsconfig.json
 tsconfig.node.json
 vite.config.ts
+vitest.config.ts
+**/__tests__/
+**/*.test.ts
+**/*.spec.ts

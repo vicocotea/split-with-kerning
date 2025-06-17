@@ -7,7 +7,7 @@
     <style>
       @font-face {
         font-family: "Voyage";
-        src: url("./Voyage-Regular.woff") format("woff");
+        src: url("./fonts/Voyage-Regular.woff") format("woff");
         font-weight: normal;
         font-style: normal;
         font-display: swap;
@@ -32,12 +32,12 @@
         margin-top: 0;
       }
 
-      .letter {
+      .char {
         display: inline-block;
         transition: color 0.3s;
       }
 
-      .letter:hover {
+      .char:hover {
         color: #ff0000;
       }
     </style>
@@ -69,7 +69,7 @@
     <script type="module">
       import { splitText, applyKerningFromExport } from "../dist/index.js";
 
-      async function runTests() {
+      async function run() {
         try {
           const kerningPairs = await fetch("./kerning-subset.json").then(
             (res) => res.json()
@@ -91,7 +91,7 @@
         }
       }
 
-      runTests();
+      run();
     </script>
   </body>
 </html>

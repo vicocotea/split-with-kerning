@@ -1,39 +1,79 @@
-// import {
-//   loadFont,
-//   splitElementWithKerning,
-//   splitWithKerning,
-//   splittedToElement,
-// } from "./";
+import {
+  applyKerningFromExport,
+  applyKerningFromFont,
+  splitText,
+} from "../src/index";
+import opentype from "opentype.js";
 
-// const init = async () => {
-//   const font = await loadFont("./Voyage-Regular.woff");
+const now = performance.now();
 
-//   if (!font) return;
+const splitType = document.getElementById("splitType") as HTMLSelectElement;
+const type = document.getElementById("type") as HTMLSelectElement;
+const splitButton = document.getElementById("split") as HTMLButtonElement;
+const applyKerningButton = document.getElementById(
+  "applyKerning"
+) as HTMLButtonElement;
+const resetButton = document.getElementById("reset") as HTMLButtonElement;
+const disableKerningButton = document.getElementById("disableKerning") as HTMLButtonElement;
 
-//   const element = document.querySelector("p") as HTMLElement;
-//   const splitted = splitWithKerning(element.innerHTML, font!);
-//   const splittedElement = splittedToElement(splitted);
-//   element.innerHTML = splittedElement.innerHTML;
-//   //   element.appendChild(splittedElement as HTMLElement);
+// first load font needed to get the kerning
+const font = await opentype.load("./fonts/Voyage-Regular.woff");
+const elements = Array.from(document.querySelectorAll("p")) as HTMLElement[];
+const backupElements = elements.map((element) => element.cloneNode(true) as HTMLElement);
 
-//   console.log("--- splitted ---", splitted);
-//   console.log("--- splittedElement ---", splittedElement);
-// };
+let isKerningDisabled = false;
 
-// // const init = async () => {
-// //   const splitted = await splitElementWithKerning(
-// //     document.querySelector("p") as HTMLElement,
-// //     "./Voyage-Regular.woff"
-// //   );
+splitButton.addEventListener("click", () => {
+  const splitTypeValue = splitType.value as "word" | "letter";
+  const typeValue = type.value as "font" | "export";
 
-// //   console.log("--- splitted ---", splitted);
-// // };
+  split(elements, splitTypeValue, typeValue);
+});
 
-// init();
+applyKerningButton.addEventListener("click", () => {
+  const typeValue = type.value as "font" | "export";
+  applyKerning(elements, typeValue);
+});
 
-import { splitElementWithKerning } from "./";
+resetButton.addEventListener("click", () => {
+  reset();
+});
 
-const splitted = await splitElementWithKerning(
-  document.querySelector("p") as HTMLElement,
-  "./Voyage-Regular.woff"
-);
+disableKerningButton.addEventListener("click", () => {
+  toggleKerning();
+});
+
+function split(
+  elements: HTMLElement[],
+  splitTypeValue: "word" | "letter",
+  typeValue: "font" | "export"
+) {
+  reset();
+  elements.forEach((element) => {    
+    splitText(element, splitTypeValue);
+  });
+}
+
+function applyKerning(elements: HTMLElement[], typeValue: "font" | "export") {
+  elements.forEach((element) => {
+    if (typeValue === "font") {
+      applyKerningFromFont(element, font);
+    } else {
+      applyKerningFromExport(element, font);
+    }
+  });
+}
+
+function reset() {
+  elements.forEach((element, index) => {
+    element.ariaLabel = backupElements[index].ariaLabel;
+    element.innerHTML = backupElements[index].innerHTML;
+  });
+}
+
+function toggleKerning() {
+  document.body.classList.toggle("disable-kerning");
+  isKerningDisabled = !isKerningDisabled;
+}
+
+console.log("--- time ---", performance.now() - now);

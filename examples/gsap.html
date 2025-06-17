@@ -22,7 +22,7 @@
       }
 
       p {
-        margin-block: 1rem;
+        margin-block: 0;
       }
 
       .test-case {
@@ -32,10 +32,13 @@
       }
 
       .test-case h2 {
-        font-size: 1.5rem;
-        margin-top: 0;
+        font-size: 1rem;
+        margin: 0;
       }
 
+      .word {
+        white-space: nowrap;
+      }
       .char {
         display: inline-block;
       }
@@ -47,12 +50,21 @@
   </head>
   <body>
     <div class="test-case">
-      <h2>Test 1: Simple Text</h2>
-      <div>Hello World</div>
-      <p>Hello World</p>
+      <h2>Texte par défaut pour comparer</h2>
+      <div>
+        Lorem ipsum dolor sit amet cœur office
+      </div>
+      <h2>Texte splitté avec SplitText from GSAP (no kerning)</h2>
+      <p>
+        Lorem ipsum dolor sit amet cœur office
+      </p>
+      <h2>Texte splitté avec SplitText from GSAP (and kerning applied)</h2>
+      <p class="with-kerning">
+        Lorem ipsum dolor sit amet cœur office
+      </p>
     </div>
 
-    <div class="test-case">
+    <!-- <div class="test-case">
       <h2>Test 2: Text with Spaces</h2>
       <p>Hello World with spaces</p>
     </div>
@@ -73,17 +85,20 @@
     <div class="test-case">
       <h2>Test 5: Long Text with inline elements</h2>
       <p>
-        Lorem ipsum dolor sit amet, <strong>consectetur adipiscing elit</strong>.
-        Sed do eiusmod <em>tempor</em> incididunt ut labore et dolore magna
-        aliqua.
+        Lorem ipsum dolor sit amet,
+        <strong>consectetur adipiscing elit</strong>. Sed do eiusmod
+        <em>tempor</em> incididunt ut labore et dolore magna aliqua.
       </p>
-    </div>
+    </div> -->
 
     <script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
     <script type="module">
       import { splitText, applyKerningFromFont } from "../dist/index.js";
+      gsap.registerPlugin(SplitText);
 
-      async function run() {
+      window.addEventListener("load", async () => {
         try {
           // Load the font
           const font = await opentype.load("./fonts/Voyage-Regular.woff");
@@ -92,23 +107,31 @@
             throw new Error("Invalid font data");
           }
 
-          // Test each paragraph
-          const paragraphs = document.querySelectorAll("p");
-          paragraphs.forEach(async (p) => {
-            splitText(p, "letter"); // or "word" (not really necessary)
+          new SplitText("p", {
+            type: "words, chars",
+            wordsClass: "word",
+            charsClass: "char",
+          });
+
+          document.querySelectorAll(".with-kerning").forEach(async (p) => {
             applyKerningFromFont(p, font, {
               wordSelector: ".word",
               charSelector: ".char",
             });
           });
 
+          // Test each paragraph
+          // const chars = Array.from(document.querySelectorAll("char"));
+          // console.log(chars);
+
+          // chars.forEach(async (char) => {
+          // });
+
           console.log("All tests completed successfully");
         } catch (error) {
           console.error("Test failed:", error);
         }
-      }
-
-      run();
+      });
     </script>
   </body>
 </html>
