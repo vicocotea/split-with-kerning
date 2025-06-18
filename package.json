@@ -1,6 +1,6 @@
 {
   "name": "split-with-kerning",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Split a text into words and letters and respect the kerning",
   "keywords": [
     "typography",

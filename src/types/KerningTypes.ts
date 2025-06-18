@@ -2,9 +2,21 @@
  * Interface for kerning data exported from a font
  */
 export interface KerningData {
-  kerningPairs: {
-    [key: string]: number; // key is the pair of characters, value is the kerning value
-  };
+  kerningPairs: Record<string, number>;
+  unitsPerEm: number;
+}
+
+
+
+
+export interface KerningPairOptimized {
+  left: string[];
+  right: string[];
+  value: number;
+}
+
+export interface KerningDataOptimized {
+  kerningPairs: KerningPairOptimized[];
   unitsPerEm: number;
 }
 

@@ -14,12 +14,20 @@ const applyKerningButton = document.getElementById(
   "applyKerning"
 ) as HTMLButtonElement;
 const resetButton = document.getElementById("reset") as HTMLButtonElement;
-const disableKerningButton = document.getElementById("disableKerning") as HTMLButtonElement;
+const disableKerningButton = document.getElementById(
+  "disableKerning"
+) as HTMLButtonElement;
 
 // first load font needed to get the kerning
 const font = await opentype.load("./fonts/Voyage-Regular.woff");
+const kerningPairs = await fetch("./fonts/Voyage-Regular-kerning.json").then(
+  (res) => res.json()
+);
+
 const elements = Array.from(document.querySelectorAll("p")) as HTMLElement[];
-const backupElements = elements.map((element) => element.cloneNode(true) as HTMLElement);
+const backupElements = elements.map(
+  (element) => element.cloneNode(true) as HTMLElement
+);
 
 let isKerningDisabled = false;
 
@@ -49,7 +57,7 @@ function split(
   typeValue: "font" | "export"
 ) {
   reset();
-  elements.forEach((element) => {    
+  elements.forEach((element) => {
     splitText(element, splitTypeValue);
   });
 }
@@ -59,7 +67,7 @@ function applyKerning(elements: HTMLElement[], typeValue: "font" | "export") {
     if (typeValue === "font") {
       applyKerningFromFont(element, font);
     } else {
-      applyKerningFromExport(element, font);
+      applyKerningFromExport(element, kerningPairs);
     }
   });
 }

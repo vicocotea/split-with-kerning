@@ -6,7 +6,7 @@
     <title>Split With Kerning Test</title>
     <style>
       @font-face {
-        font-family: "Voyage";
+        font-family: "Voyage-Regular";
         src: url("./fonts/Voyage-Regular.woff") format("woff");
         font-weight: normal;
         font-style: normal;
@@ -18,7 +18,7 @@
         padding: 2rem;
         font-size: 4rem;
         color: #333;
-        font-family: "Voyage", sans-serif;
+        font-family: "Voyage-Regular", sans-serif;
       }
 
       .test-case {
@@ -30,6 +30,10 @@
       .test-case h2 {
         font-size: 1.5rem;
         margin-top: 0;
+      }
+
+      .word {
+        display: inline-block;
       }
 
       .char {
@@ -45,7 +49,7 @@
   <body>
     <div class="test-case">
       <h2>Test 1: Simple Text</h2>
-      <p>Hello World</p>
+      <p>Whereas disregard and contempt for human rights have resulted</p>
     </div>
 
     <div class="test-case">
@@ -67,31 +71,63 @@
     </div>
 
     <script type="module">
-      import { splitText, applyKerningFromExport } from "../dist/index.js";
+      import gsap from "gsap";
+      import { SplitText } from "gsap/SplitText";
 
-      async function run() {
-        try {
-          const kerningPairs = await fetch("./kerning-subset.json").then(
-            (res) => res.json()
-          );
+      import { splitText, applyKerningFromExport } from "../src/index.ts";
+      // import { splitText, applyKerningFromExport } from "../dist/index.js";
+      // import { applyKerningFromExport } from "split-with-kerning";
+      gsap.registerPlugin(SplitText);
 
-          // Test each paragraph
+      const kerningPairs = fetch("./kerning.json")
+        .then((res) => res.json())
+        .then((kerningPairs) => {
           const paragraphs = document.querySelectorAll("p");
-          paragraphs.forEach(async (p) => {
-            splitText(p);
+
+          new SplitText(paragraphs, {
+            type: "words, chars",
+            wordsClass: "word",
+            charsClass: "char",
+          });
+
+          // apply the kerning from the exported data to .char elements
+          paragraphs.forEach((p) => {
             applyKerningFromExport(p, kerningPairs, {
               wordSelector: ".word",
               charSelector: ".char",
             });
           });
+        });
 
-          console.log("All tests completed successfully");
-        } catch (error) {
-          console.error("Test failed:", error);
-        }
-      }
+      console.log("All tests completed successfully");
 
-      run();
+      // import { splitText, applyKerningFromExport } from "../dist/index.js";
+
+      // async function run() {
+      //   try {
+      //     const kerningPairs = await fetch("./fonts/Voyage-Regular-kerning.json").then(
+      //       (res) => res.json()
+      //     );
+
+      //     // Test each paragraph
+      //     const paragraphs = document.querySelectorAll("p");
+      //     paragraphs.forEach(async (p) => {
+      //       splitText(p);
+      //       applyKerningFromExport(p, kerningPairs, {
+      //         wordSelector: ".word",
+      //         charSelector: ".char",
+      //       });
+      //     });
+
+      //     console.log("All tests completed successfully");
+      //   } catch (error) {
+      //     console.error("Test failed:", error);
+      //   }
+      // }
+
+      // window.addEventListener("load", () => {
+      //   run();
+      // });
     </script>
   </body>
 </html>

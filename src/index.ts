@@ -1,11 +1,16 @@
 import { getKerningValue } from "./utils/get-kerning-value";
-import { FontLike, KerningData, KerningOptions } from "./types/KerningTypes";
+import { convertOptimizedToKerningPairs } from "./utils/convert-to-kerning-pairs";
+import { FontLike, KerningDataOptimized, KerningOptions } from "./types/KerningTypes";
 
 function applyKerningToElement(
   element: HTMLElement,
   getKerning: (currentChar: string, nextChar: string) => number,
   options: KerningOptions = {}
 ) {
+  if (!element) {
+    throw new Error("Element is required");
+  }
+
   const { wordSelector = ".word", charSelector = ".char" } = options;
 
   // Batch DOM reads
@@ -54,14 +59,15 @@ export function applyKerningFromFont(
 
 export function applyKerningFromExport(
   element: HTMLElement,
-  kernings: KerningData,
+  kernings: KerningDataOptimized,
   options: KerningOptions = {}
 ) {
+  const normKernings = convertOptimizedToKerningPairs(kernings);
   applyKerningToElement(
     element,
     (currentChar, nextChar) =>
-      (kernings.kerningPairs[`${currentChar}${nextChar}`] ?? 0) /
-      kernings.unitsPerEm,
+      (normKernings.kerningPairs[`${currentChar}${nextChar}`] ?? 0) /
+      normKernings.unitsPerEm,
     options
   );
 }

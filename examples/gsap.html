@@ -6,7 +6,7 @@
     <title>Split With Kerning Test</title>
     <style>
       @font-face {
-        font-family: "Voyage";
+        font-family: "Voyage-Regular";
         src: url("./fonts/Voyage-Regular.woff") format("woff");
         font-weight: normal;
         font-style: normal;
@@ -18,7 +18,7 @@
         padding: 2rem;
         font-size: 4rem;
         color: #333;
-        font-family: "Voyage", sans-serif;
+        font-family: "Voyage-Regular", sans-serif;
       }
 
       p {
@@ -52,15 +52,15 @@
     <div class="test-case">
       <h2>Texte par défaut pour comparer</h2>
       <div>
-        Lorem ipsum dolor sit amet cœur office
+        Kerning Hello World Lorem ipsum dolor sit amet cœur office
       </div>
       <h2>Texte splitté avec SplitText from GSAP (no kerning)</h2>
       <p>
-        Lorem ipsum dolor sit amet cœur office
+        Kerning Hello World Lorem ipsum dolor sit amet cœur office
       </p>
       <h2>Texte splitté avec SplitText from GSAP (and kerning applied)</h2>
       <p class="with-kerning">
-        Lorem ipsum dolor sit amet cœur office
+        Kerning Hello World Lorem ipsum dolor sit amet cœur office
       </p>
     </div>
 
@@ -119,13 +119,6 @@
               charSelector: ".char",
             });
           });
-
-          // Test each paragraph
-          // const chars = Array.from(document.querySelectorAll("char"));
-          // console.log(chars);
-
-          // chars.forEach(async (char) => {
-          // });
 
           console.log("All tests completed successfully");
         } catch (error) {

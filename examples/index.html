@@ -6,7 +6,7 @@
     <title>Split With Kerning Test</title>
     <style>
       @font-face {
-        font-family: "Voyage";
+        font-family: "Voyage-Regular";
         src: url("./fonts/Voyage-Regular.woff") format("woff");
         font-weight: normal;
         font-style: normal;
@@ -18,7 +18,7 @@
         padding: 2rem;
         font-size: 4rem;
         color: #333;
-        font-family: "Voyage", sans-serif;
+        font-family: "Voyage-Regular", sans-serif;
       }
 
       p {
@@ -34,6 +34,11 @@
       .test-case h2 {
         font-size: 1.5rem;
         margin-top: 0;
+      }
+
+      .word {
+        display: inline-block;
+        word-wrap: nowrap;
       }
 
       .char {

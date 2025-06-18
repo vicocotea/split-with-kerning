@@ -17,7 +17,7 @@ import opentype from "opentype.js";
 import { splitText, applyKerningFromFont } from "split-with-kerning";
 
 // first load font needed to get the kerning
-const font = await opentype.load("./Voyage-Regular.woff")
+const font = await opentype.load("./fonts/Voyage-Regular.woff")
   .then(() => {
     const paragraph = document.querySelectorAll("p");
     
@@ -41,15 +41,15 @@ const font = await opentype.load("./Voyage-Regular.woff")
 }
 ```
 
-## Optimized version
+## Optimized version (no opentype.js)
 
-First, we will export the kernings from a font with [export-kerning](https://www.npmjs.com/package/export-kerning) package.
-Then, we can use the exported json (no need to load opentype.js) and `applyKerningFromExport` function
+First, exports the kernings from a font with [export-kerning](https://www.npmjs.com/package/export-kerning) package.
+Then, we can use this exported json (no need to load opentype.js) and `applyKerningFromExport` function
 
 ```typescript
 import { splitText, applyKerningFromExport } from "split-with-kerning";
 
-const kerningPairs = fetch("./kerning-subset.json")
+const kerningPairs = fetch("./kerning.json")
   .then((res) => res.json())
   .then(() => {
     const paragraph = document.querySelectorAll("p");
@@ -69,34 +69,29 @@ const kerningPairs = fetch("./kerning-subset.json")
 ```typescript
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
-import { applyKerningFromFont } from "split-with-kerning";
+import { applyKerningFromExport } from "split-with-kerning";
+
 gsap.registerPlugin(SplitText);
 
-window.addEventListener("load", async () => {
-  try {
-    // Load the font
-    const font = await opentype.load("./fonts/Voyage-Regular.woff");
-    // Validate font data
-    if (!font) {
-      throw new Error("Invalid font data");
-    }
+const kerningPairs = fetch("./kerning.json")
+  .then((res) => res.json())
+  .then((kerningPairs) => {
+    const paragraphs = document.querySelectorAll("p");
 
-    new SplitText("p", {
+    new SplitText(paragraphs, {
       type: "words, chars",
       wordsClass: "word",
       charsClass: "char",
     });
 
-    document.querySelectorAll("p").forEach(async (p) => {
-      applyKerningFromFont(p, font, {
+    // apply the kerning from the exported data to .char elements
+    paragraphs.forEach((p) => {
+      applyKerningFromExport(p, kerningPairs, {
         wordSelector: ".word",
         charSelector: ".char",
       });
     });
-  } catch (error) {
-    console.error("Test failed:", error);
-  }
-});
+  });
 ```
 
 ## Development
