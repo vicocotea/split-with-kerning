@@ -11,7 +11,12 @@ export default defineConfig({
       formats: ["es", "umd"],
     },
   },
-  plugins: [dts()],
+  plugins: [
+    dts({
+      outDir: "dist",
+      rollupTypes: true,
+    })
+  ],
   root: ".",
   publicDir: "public",
   server: {
