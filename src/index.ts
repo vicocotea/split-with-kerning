@@ -1,49 +1,16 @@
 import { getKerningValue } from "./utils/get-kerning-value";
 import { convertOptimizedToKerningPairs } from "./utils/convert-to-kerning-pairs";
-import { FontLike, KerningDataOptimized, KerningOptions } from "./types/KerningTypes";
-
-function applyKerningToElement(
-  element: HTMLElement,
-  getKerning: (currentChar: string, nextChar: string) => number,
-  options: KerningOptions = {}
-) {
-  if (!element) {
-    throw new Error("Element is required");
-  }
-
-  const { wordSelector = ".word", charSelector = ".char" } = options;
-
-  // Batch DOM reads
-  const words = Array.from(element.querySelectorAll<HTMLElement>(wordSelector));
-  const updates: { element: HTMLElement; margin: string }[] = [];
-
-  // Process all words and collect updates
-  for (const word of words) {
-    const letters = Array.from(
-      word.querySelectorAll<HTMLElement>(charSelector)
-    );
-    for (let i = 0; i < letters.length; i++) {
-      const letter = letters[i];
-      if (letter.textContent) {
-        const kerning = getKerning(
-          letter.textContent,
-          letters[i + 1]?.textContent ?? ""
-        );
-        updates.push({
-          element: letter,
-          margin: `${kerning}em`,
-        });
-      }
-    }
-  }
-
-  // Batch DOM writes
-  if (updates.length > 0) {
-    for (const { element, margin } of updates) {
-      element.style.marginInlineEnd = margin;
-    }
-  }
-}
+import { applyKerningToElement } from "./utils/apply-kerning";
+import type {
+  FontLike,
+  KerningOptions,
+  SplitType,
+  Letter,
+  Word,
+  TextElement,
+  SplittedText,
+  KerningData,
+} from "./types/KerningTypes";
 
 export function applyKerningFromFont(
   element: HTMLElement,
@@ -59,23 +26,33 @@ export function applyKerningFromFont(
 
 export function applyKerningFromExport(
   element: HTMLElement,
-  kernings: KerningDataOptimized,
+  kernings: KerningData,
   options: KerningOptions = {}
 ) {
-  const normKernings = convertOptimizedToKerningPairs(kernings);
   applyKerningToElement(
     element,
     (currentChar, nextChar) =>
-      (normKernings.kerningPairs[`${currentChar}${nextChar}`] ?? 0) /
-      normKernings.unitsPerEm,
+      (kernings.kerningPairs[`${currentChar}${nextChar}`] ?? 0) /
+      kernings.unitsPerEm,
     options
   );
 }
 
 export function splitText(
   element: HTMLElement,
-  splitType: "word" | "letter" = "letter"
-) {
+  splitType: SplitType = "letter"
+): SplittedText {
+  // Store original content for reset functionality
+  const originalContent = element.innerHTML;
+  const originalAriaLabel = element.getAttribute("aria-label");
+
+  // Initialize the splitted text structure
+  const text: TextElement = {
+    value: element.textContent ?? "",
+    words: [],
+    element: element,
+  };
+
   function processTextNode(textNode: Node) {
     const frag = document.createDocumentFragment();
     const words = textNode.textContent?.split(/(\s+)/) ?? [];
@@ -88,6 +65,12 @@ export function splitText(
         wordSpan.ariaHidden = "true";
         wordSpan.className = "word";
 
+        const word: Word = {
+          value: part,
+          element: wordSpan,
+          letters: [],
+        };
+
         if (splitType === "word") {
           wordSpan.textContent = part;
         } else {
@@ -97,9 +80,16 @@ export function splitText(
             charSpan.className = "char";
             charSpan.textContent = char;
             wordSpan.appendChild(charSpan);
+
+            const letter: Letter = {
+              value: char,
+              element: charSpan,
+            };
+            word.letters!.push(letter);
           }
         }
 
+        text.words!.push(word);
         frag.appendChild(wordSpan);
       }
     }
@@ -128,6 +118,20 @@ export function splitText(
   element.ariaLabel = element.textContent ?? "";
   element.innerHTML = "";
   element.appendChild(newContent);
+
+  // Return object with reset method and splitted text structure
+  return {
+    reset: () => {
+      element.innerHTML = originalContent;
+      if (originalAriaLabel) {
+        element.setAttribute("aria-label", originalAriaLabel);
+      } else {
+        element.removeAttribute("aria-label");
+      }
+    },
+    splitted: text,
+  };
 }
 
-export { getKerningValue };
+export * from "./types/KerningTypes";
+export { getKerningValue, convertOptimizedToKerningPairs };

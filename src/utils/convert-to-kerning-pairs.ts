@@ -13,7 +13,7 @@ export function convertOptimizedToKerningPairs(optimizedData: KerningDataOptimiz
       }
     }
   }
-  
+
   return {
     unitsPerEm: optimizedData.unitsPerEm,
     kerningPairs: result

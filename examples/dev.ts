@@ -1,9 +1,11 @@
 import {
   applyKerningFromExport,
   applyKerningFromFont,
+  convertOptimizedToKerningPairs,
   splitText,
 } from "../src/index";
 import opentype from "opentype.js";
+import type { SplittedText } from "../src/types/KerningTypes";
 
 const now = performance.now();
 
@@ -20,14 +22,12 @@ const disableKerningButton = document.getElementById(
 
 // first load font needed to get the kerning
 const font = await opentype.load("./fonts/Voyage-Regular.woff");
-const kerningPairs = await fetch("./fonts/Voyage-Regular-kerning.json").then(
-  (res) => res.json()
-);
+const kerningPairs = await fetch("./fonts/Voyage-Regular-kerning.json")
+  .then((res) => res.json())
+  .then((data) => convertOptimizedToKerningPairs(data));
 
 const elements = Array.from(document.querySelectorAll("p")) as HTMLElement[];
-const backupElements = elements.map(
-  (element) => element.cloneNode(true) as HTMLElement
-);
+const splitted: SplittedText[] = [];
 
 let isKerningDisabled = false;
 
@@ -58,7 +58,8 @@ function split(
 ) {
   reset();
   elements.forEach((element) => {
-    splitText(element, splitTypeValue);
+    const result: SplittedText = splitText(element, splitTypeValue);
+    splitted.push(result);
   });
 }
 
@@ -73,10 +74,10 @@ function applyKerning(elements: HTMLElement[], typeValue: "font" | "export") {
 }
 
 function reset() {
-  elements.forEach((element, index) => {
-    element.ariaLabel = backupElements[index].ariaLabel;
-    element.innerHTML = backupElements[index].innerHTML;
+  splitted.forEach((item) => {
+    item.reset();
   });
+  splitted.length = 0;
 }
 
 function toggleKerning() {

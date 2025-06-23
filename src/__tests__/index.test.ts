@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { splitText, applyKerningFromExport } from '../index';
+import { splitText, applyKerningFromExport, KerningDataOptimized, convertOptimizedToKerningPairs } from '../index';
 
 describe('splitText', () => {
   let container: HTMLElement;
@@ -59,7 +59,8 @@ describe('applyKerningFromExport', () => {
       unitsPerEm: 1000
     };
 
-    applyKerningFromExport(container, kerningData);
+    const kerningDataNormalized = convertOptimizedToKerningPairs(kerningData as KerningDataOptimized);
+    applyKerningFromExport(container, kerningDataNormalized);
 
     const firstChar = container.querySelector('.char') as HTMLElement;
     expect(firstChar?.style.marginInlineEnd).toBe('-0.1em');
@@ -80,7 +81,8 @@ describe('applyKerningFromExport', () => {
       unitsPerEm: 1000
     };
 
-    applyKerningFromExport(container, kerningData);
+    const kerningDataNormalized = convertOptimizedToKerningPairs(kerningData as KerningDataOptimized);
+    applyKerningFromExport(container, kerningDataNormalized);
 
     const chars = container.querySelectorAll('.char') as NodeListOf<HTMLElement>;
     expect(chars[0]?.style.marginInlineEnd).toBe('-0.08em'); // A before V
@@ -96,7 +98,8 @@ describe('applyKerningFromExport', () => {
       unitsPerEm: 1000
     };
 
-    applyKerningFromExport(container, kerningData);
+    const kerningDataNormalized = convertOptimizedToKerningPairs(kerningData as KerningDataOptimized);
+    applyKerningFromExport(container, kerningDataNormalized);
 
     const firstChar = container.querySelector('.char') as HTMLElement;
     expect(firstChar?.style.marginInlineEnd).toBe('0em');
@@ -122,7 +125,8 @@ describe('applyKerningFromExport', () => {
       unitsPerEm: 1000
     };
 
-    applyKerningFromExport(container, kerningData);
+    const kerningDataNormalized = convertOptimizedToKerningPairs(kerningData as KerningDataOptimized);
+    applyKerningFromExport(container, kerningDataNormalized);
 
     const chars = container.querySelectorAll('.char') as NodeListOf<HTMLElement>;
     expect(chars[0]?.style.marginInlineEnd).toBe('-0.12em'); // A before V

@@ -22,7 +22,7 @@ const font = await opentype.load("./fonts/Voyage-Regular.woff")
     const paragraph = document.querySelectorAll("p");
     
     // split a DOM element into words and letters
-    splitText(paragraph);
+    const { reset, splitted } = splitText(paragraph);
     
     // apply the kerning from the font to .char elements
     applyKerningFromFont(paragraph, font, {
@@ -47,18 +47,19 @@ First, exports the kernings from a font with [export-kerning](https://www.npmjs.
 Then, we can use this exported json (no need to load opentype.js) and `applyKerningFromExport` function
 
 ```typescript
-import { splitText, applyKerningFromExport } from "split-with-kerning";
+import { splitText, applyKerningFromExport, convertOptimizedToKerningPairs } from "split-with-kerning";
 
-const kerningPairs = fetch("./kerning.json")
+await fetch("./kerning.json")
   .then((res) => res.json())
-  .then(() => {
+  .then((json) => convertOptimizedToKerningPairs(json))
+  .then((kerningPairs) => {
     const paragraph = document.querySelectorAll("p");
 
     // split a DOM element into words and letters
-    splitText(paragraph);
+    const { reset, splitted } = splitText(paragraph);
 
     // apply the kerning from the exported data to .char elements
-    applyKerningFromExport(paragraph, font, {
+    applyKerningFromExport(paragraph, kerningPairs, {
       wordSelector: ".word",
       charSelector: ".char",
     });
@@ -69,12 +70,13 @@ const kerningPairs = fetch("./kerning.json")
 ```typescript
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
-import { applyKerningFromExport } from "split-with-kerning";
+import { applyKerningFromExport, convertOptimizedToKerningPairs } from "split-with-kerning";
 
 gsap.registerPlugin(SplitText);
 
-const kerningPairs = fetch("./kerning.json")
+await fetch("./kerning.json")
   .then((res) => res.json())
+  .then((json) => convertOptimizedToKerningPairs(json))
   .then((kerningPairs) => {
     const paragraphs = document.querySelectorAll("p");
 
