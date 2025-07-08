@@ -53,7 +53,7 @@ disableKerningButton.addEventListener("click", () => {
 
 function split(
   elements: HTMLElement[],
-  splitTypeValue: "word" | "letter",
+  splitTypeValue: "word" | "letter" | "none",
   typeValue: "font" | "export"
 ) {
   reset();

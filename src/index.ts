@@ -55,7 +55,13 @@ export function splitText(
 
   function processTextNode(textNode: Node) {
     const frag = document.createDocumentFragment();
-    const words = textNode.textContent?.split(/(\s+)/) ?? [];
+
+    let words: string[] = [];
+    if (splitType === "none") {
+      words = [textNode.textContent ?? ""];
+    } else {
+      words = textNode.textContent?.split(/(\s+)/) ?? [];
+    }
 
     for (const part of words) {
       if (!part.trim()) {
@@ -67,13 +73,15 @@ export function splitText(
 
         const word: Word = {
           value: part,
-          element: wordSpan,
-          letters: [],
+          element: wordSpan
         };
 
         if (splitType === "word") {
           wordSpan.textContent = part;
+        } else if (splitType === "none") {
+          wordSpan.textContent = part;
         } else {
+          word.letters = [];
           for (const char of part) {
             const charSpan = document.createElement("span");
             charSpan.ariaHidden = "true";

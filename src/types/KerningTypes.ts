@@ -43,7 +43,7 @@ export interface FontLike {
 /**
  * Type of hierarchical splitting
  */
-export type SplitType = 'letter' | 'word';
+export type SplitType = 'letter' | 'word' | 'none';
 
 /**
  * Represents a single letter
